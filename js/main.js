@@ -11,9 +11,6 @@ const MP_BUNDLE = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER
 const MP_WASM = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VERSION}/wasm`;
 const FACE_MODEL = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
 
-// Venmo username for the thank-you link on the results card (without the @). Empty = link hidden.
-const VENMO = '';
-
 const $ = (s) => document.querySelector(s);
 const canvas = $('#c'), ctx = canvas.getContext('2d'), video = $('#video');
 const work = document.createElement('canvas'), wctx = work.getContext('2d', { willReadFrequently: true });
@@ -96,7 +93,6 @@ function showResults() {
   $('#rRows').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
   st.shareText = `I held my breath for ${fmt(best)} in Breathtaker, a game you play by breathing. ${stats.breaths} big breaths, ${stats.found} things met in space.`;
   $('#share').textContent = 'Share with a friend';
-  if (VENMO) { $('#tipLink').href = `https://venmo.com/u/${encodeURIComponent(VENMO)}`; $('#tip').hidden = false; }
   $('#results').hidden = false;
 }
 
