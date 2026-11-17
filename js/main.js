@@ -1,4 +1,4 @@
-// Breathtaker: wiring. Camera -> vitals.js -> breath.js; journey.js drives stages.js and audio.js.
+// Sips: wiring. Camera -> vitals.js -> breath.js; journey.js drives stages.js and audio.js.
 import { V, vitalsFrame } from './vitals.js';
 import { Br, updateBreath, press } from './breath.js';
 import { buildJourney, Journey } from './journey.js';
@@ -104,7 +104,7 @@ function showResults() {
   rows.push(['Things met in space', stats.found]);
   if (Br.syncN > 20) rows.push(['In step with the pacer', Math.round((100 * Br.syncSum) / Br.syncN) + '%']);
   $('#rRows').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
-  st.shareText = `I held my breath for ${fmt(best)} in Breathtaker, a game you play by breathing. ${stats.breaths} big breaths, ${stats.found} things met in space.`;
+  st.shareText = `I held my breath for ${fmt(best)} in Sips, a game you play by breathing. ${stats.breaths} big breaths, ${stats.found} things met in space.`;
   $('#share').textContent = 'Share with a friend';
   $('#results').hidden = false;
 }
@@ -116,7 +116,7 @@ $('#again').onclick = () => begin(false);
 // share sheet where the device has one (phones, Safari); otherwise copy the message and link
 $('#share').onclick = async () => {
   const url = location.origin + location.pathname, text = `${st.shareText} Try to beat me:`, b = $('#share');
-  if (navigator.share) { try { await navigator.share({ title: 'Breathtaker', text, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  if (navigator.share) { try { await navigator.share({ title: 'Sips', text, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
   try { await navigator.clipboard.writeText(`${text} ${url}`); b.textContent = 'Copied. Paste it to a friend'; }
   catch (e) { window.prompt('Copy this and send it to a friend', `${text} ${url}`); }
   setTimeout(() => { b.textContent = 'Share with a friend'; }, 4000);
