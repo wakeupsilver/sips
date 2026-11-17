@@ -175,7 +175,7 @@ function frame() {
 
   if (Br.source === 'camera' && Br.conf > 0.35) setChip('Seeing your breath', true);
   else if (Br.source === 'keys') setChip(TOUCH ? 'Touch breathing' : 'Space bar is your breath', true);
-  else if (st.cam && !st.faceFailed) setChip(V.geom ? 'Finding your breath' : 'Looking for you', false);
+  else if (st.cam && !st.faceFailed) setChip(!V.geom ? 'Looking for your face' : !V.geom.chest ? 'Move back: show your chest' : V.motionEMA > 0.25 ? 'Hold still' : 'Finding your breath', false);
   else setChip('Follow the pacer', false);
   chip.style.setProperty('--s', (0.7 + 0.8 * (Br.sensed ?? Br.level)).toFixed(2));
 
