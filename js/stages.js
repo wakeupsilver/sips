@@ -435,6 +435,6 @@ export function drawStage(F) {
 export function drawIdle(F) {
   const narrow = F.W < 760;                            // on phones the start text covers the whole sky
   sipsScene(F, WAYS[0], F.now * 40, narrow);
-  if (narrow) return;
-  puff(F.ctx, F.W * 0.5, F.H * 0.8, F.u * (6 + 3 * F.level), { t: F.now, vel: F.vel, eyes: F.vel > 0 ? 'open' : 'happy', mouth: F.vel > 0.05 ? 'in' : 'smile' });
+  if (narrow || F.H < 700) return;                     // no room: Puff would sit on the text
+  puff(F.ctx, F.W * 0.5, F.H * 0.84, F.u * (6 + 3 * F.level), { t: F.now, vel: F.vel, eyes: F.vel > 0 ? 'open' : 'happy', mouth: F.vel > 0.05 ? 'in' : 'smile' });
 }

@@ -47,9 +47,10 @@ h1 { font: 400 clamp(4.2rem, 15vw, 10.5rem)/.8 var(--display); margin: 0 0 1.6re
 .plain { text-decoration: underline; text-underline-offset: .25em; font-weight: 700; padding: .5rem 0; }
 .fine { font-size: .85rem; max-width: 28rem; margin: 1.4rem 0 0; opacity: .9; }
 .safety { align-self: end; background: var(--lemon); color: var(--ink); border-radius: 1.4rem; padding: 1.3rem 1.5rem 1.2rem; transform: rotate(-2deg); box-shadow: 7px 8px 0 var(--ink); }
-.safety h2 { font: 400 1.5rem/1 var(--display); margin: 0 0 .7rem; }
-.safety ul { margin: 0; padding-left: 1.1rem; font-size: .92rem; line-height: 1.4; }
-.safety li + li { margin-top: .4rem; }
+.safety h2 { font: 400 1.55rem/1.05 var(--display); margin: 0 0 .6rem; }
+.safety .lede { margin: 0 0 .7rem; font-size: .95rem; font-weight: 700; line-height: 1.35; }
+.safety ul { margin: 0; padding-left: 1rem; font-size: .76rem; line-height: 1.4; }
+.safety li + li { margin-top: .28rem; }
 @media (max-width: 760px) { #intro { grid-template-columns: 1fr; } .safety { transform: rotate(-1deg); margin-bottom: 1rem; } }
 
 /* ---------------------------------------------------------------- results */
