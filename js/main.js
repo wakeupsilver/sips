@@ -1,6 +1,6 @@
 // Breathtaker: wiring. Camera -> vitals.js -> breath.js; journey.js drives stages.js and audio.js.
 import { V, vitalsFrame } from './vitals.js';
-import { Br, updateBreath } from './breath.js';
+import { Br, updateBreath, press } from './breath.js';
 import { buildJourney, Journey } from './journey.js';
 import * as audio from './audio.js';
 import { drawStage, drawIdle, drawGauge, onSeg, stats, resetStats } from './stages.js';
@@ -12,6 +12,18 @@ const MP_WASM = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VERSI
 const FACE_MODEL = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
 
 const $ = (s) => document.querySelector(s);
+const TOUCH = window.matchMedia?.('(pointer: coarse)').matches;
+document.documentElement.classList.toggle('touch', !!TOUCH);
+if (!CanvasRenderingContext2D.prototype.roundRect) {          // older phones
+  CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+    const R = (Array.isArray(r) ? r : [r, r, r, r]).map((v) => Math.min(v || 0, w / 2, h / 2));
+    const [a, b, c, d] = R.length === 4 ? R : [R[0], R[0], R[0], R[0]];
+    this.moveTo(x + a, y); this.arcTo(x + w, y, x + w, y + h, b); this.arcTo(x + w, y + h, x, y + h, c); this.arcTo(x, y + h, x, y, d); this.arcTo(x, y, x + w, y, a); this.closePath();
+  };
+}
+// keep the screen awake: nobody touches a phone for twelve minutes of breathing
+let wake = null;
+async function keepAwake() { try { if (navigator.wakeLock && !document.hidden) { wake = await navigator.wakeLock.request('screen'); } } catch (e) { /* not allowed right now */ } }
 const canvas = $('#c'), ctx = canvas.getContext('2d'), video = $('#video');
 const work = document.createElement('canvas'), wctx = work.getContext('2d', { willReadFrequently: true });
 V.wctx = wctx;
@@ -67,7 +79,7 @@ J.onSeg = (seg, at) => {
   if (seg.kind === 'end') st.endT = at;
 };
 async function begin(withCam) {
-  audio.initAudio();
+  audio.initAudio(); keepAwake();
   document.fonts?.load('10px "Bagel Fat One"');
   if (withCam) { try { await startCamera(); } catch (e) { console.warn('No camera', e); st.camDenied = true; } }
   resetStats(); parts.length = 0; Br.syncSum = Br.syncN = 0; st.prev = null; st.cued = null; st.resultsShown = false;
@@ -109,17 +121,26 @@ $('#share').onclick = async () => {
   setTimeout(() => { b.textContent = 'Share with a friend'; }, 4000);
 };
 $('#air').onclick = release;
-canvas.addEventListener('pointerdown', release);
+canvas.addEventListener('pointerdown', (e) => { e.preventDefault(); press(true); release(); });
+for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) canvas.addEventListener(ev, () => press(false));
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 $('#bSkip').onclick = () => st.playing && J.skip(audio.clock());
-$('#bSound').onclick = () => { const m = !audio.A.muted; audio.setMuted(m); $('#bSound').textContent = m ? 'Sound off' : 'Sound on'; $('#bSound').setAttribute('aria-pressed', String(!m)); };
+// sound on/off: on the start screen and in the top bar, remembered on this device
+function setSound(on) {
+  audio.setMuted(!on);
+  for (const b of [$('#bSound'), $('#introSound')]) { b.textContent = on ? 'Sound on' : 'Sound off'; b.setAttribute('aria-pressed', String(on)); }
+  try { localStorage.setItem('bt-sound', on ? 'on' : 'off'); } catch (e) { /* private mode */ }
+}
+$('#bSound').onclick = $('#introSound').onclick = () => setSound(audio.A.muted);
+try { if (localStorage.getItem('bt-sound') === 'off') setSound(false); } catch (e) { /* private mode */ }
 window.addEventListener('keydown', (e) => {
   if (e.target.closest?.('button') && e.code === 'Space') return;
-  if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) { Br.key = true; Br.keyT = performance.now() / 1000; release(); } }
+  if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) { press(true); release(); } }
   else if (e.code === 'ArrowRight' && st.playing) J.skip(audio.clock());
   else if (e.code === 'KeyM') $('#bSound').click();
 });
-window.addEventListener('keyup', (e) => { if (e.code === 'Space') { Br.key = false; Br.keyT = performance.now() / 1000; } });
-document.addEventListener('visibilitychange', () => audio.suspend(document.hidden));
+window.addEventListener('keyup', (e) => { if (e.code === 'Space') press(false); });
+document.addEventListener('visibilitychange', () => { audio.suspend(document.hidden); if (!document.hidden && st.playing) keepAwake(); });
 
 // ------------------------------------------------------------------ frame
 const chip = $('#chip'), chipText = chip.querySelector('span');
@@ -152,7 +173,7 @@ function frame() {
   ctx.globalAlpha = 1; drawStage(F); if (!F.partsDone) drawParts(ctx, dt); drawGauge(F); grain(ctx, W, H);
 
   if (Br.source === 'camera' && Br.conf > 0.35) setChip('Seeing your breath', true);
-  else if (Br.source === 'keys') setChip('Space bar is your breath', true);
+  else if (Br.source === 'keys') setChip(TOUCH ? 'Touch breathing' : 'Space bar is your breath', true);
   else if (st.cam && !st.faceFailed) setChip(V.geom ? 'Finding your breath' : 'Looking for you', false);
   else setChip('Follow the pacer', false);
   chip.style.setProperty('--s', (0.7 + 0.8 * (Br.sensed ?? Br.level)).toFixed(2));
@@ -163,4 +184,6 @@ function frame() {
   if (seg.kind === 'end' && !st.resultsShown && now - st.endT > 4.5) showResults();
 }
 requestAnimationFrame(frame);
+// unreleased features live outside site/ and load only on this machine (see ../plus)
+if (['localhost', '127.0.0.1'].includes(location.hostname)) import('../plus/teaser.js').then((m) => m.default($('#plusSlot'))).catch(() => {});
 window.bt = { J, Br, V, st, stats, audio };

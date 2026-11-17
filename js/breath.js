@@ -14,8 +14,15 @@ export const Br = {
   sync: 0.5,         // slow average of "moving the way the pacer asks"
   syncSum: 0, syncN: 0,
   source: 'pacer',   // 'pacer' | 'camera' | 'keys'
-  key: false, keyLevel: 0, keyT: -99, bigInhale: 0,
+  key: false, keyLevel: 0, keyT: -99, keyDownT: -99, keyMode: false, bigInhale: 0,
 };
+
+// space bar or a finger on the screen: down = breathing in
+export function press(down) {
+  const t = performance.now() / 1000;
+  if (down && !Br.key) Br.keyDownT = t;
+  Br.key = down; Br.keyT = t;
+}
 
 export function updateBreath(dt, tPerf, pacer, pacerDir, camOn) {
   const B = Br; B.pacer = pacer;
@@ -23,7 +30,9 @@ export function updateBreath(dt, tPerf, pacer, pacerDir, camOn) {
 
   // space bar: hold = breathe in
   B.keyLevel = clamp(B.keyLevel + (B.key ? dt / 1.3 : -dt / 2.2), 0, 1);
-  const keysActive = tPerf - B.keyT < 20;
+  if (B.key) { B.keyT = tPerf; if (!camOn || tPerf - B.keyDownT > 0.4) B.keyMode = true; }
+  if (tPerf - B.keyT > 20) B.keyMode = false;
+  const keysActive = B.keyMode;
 
   const b = V.bviz, fresh = camOn && b && V.geom && V.chest.length && tPerf - V.chest.t[V.chest.length - 1] < 0.5;
   if (fresh && !keysActive) {

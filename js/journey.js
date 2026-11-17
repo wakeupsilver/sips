@@ -52,7 +52,7 @@ export function buildJourney() {
     }
     add({ stage: 'wim', kind: 'out', dur: 8 * WIM_BEAT, from: 1, to: 0, cue: 'all the way out', round: r, drop: true, sub: 'Then rest empty for as long as it feels easy.' });
     add({ stage: 'wim', kind: 'hold', dur: 0, open: true, target: WIM_TARGETS[r], from: 0, to: 0, cue: 'hold', round: r,
-      sub: 'Rest empty. Breathe in whenever you like: tap or press space when you do.' });
+      sub: 'Rest empty. Breathe in whenever you like, then tap the screen or press space.' });
     add({ stage: 'wim', kind: 'in', dur: 8 * WIM_BEAT, from: 0, to: 1, cue: 'big breath in', round: r, rise: true });
     add({ stage: 'wim', kind: 'hold', dur: 32 * WIM_BEAT, from: 1, to: 1, cue: 'hold it', round: r, bloom: true, sub: 'Full. Let it glow.' });
     add({ stage: 'wim', kind: 'out', dur: 8 * WIM_BEAT, from: 1, to: 0, cue: 'let go', round: r, after: true });

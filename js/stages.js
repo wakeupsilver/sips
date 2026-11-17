@@ -53,7 +53,8 @@ function sipsScene(F, w, scroll, bare) {
 }
 function drawSips(F) {
   const { ctx, W, H, u, now, seg, el, J, br, level, vel } = F;
-  const px = W * 0.28, speed = Math.max(170, W * 0.2), yOf = (l) => lerp(H * 0.68, H * 0.2, l), scroll = now * speed;
+  const px = W * 0.28, speed = W < 600 ? W * 0.24 : Math.max(170, W * 0.2),   // phones: slower scroll, so you still see ~3 s ahead
+    yOf = (l) => lerp(H * 0.68, H * 0.2, l), scroll = now * speed;
   const w = WAYS[sips.way], wipe = smooth((now - sips.wayT) / 0.9);
   if (wipe < 1) {
     sipsScene(F, WAYS[sips.prev], scroll);
@@ -139,7 +140,7 @@ function drawSkyline(F, base, n, growNewest) {
 function drawBox(F) {
   const { ctx, W, H, u, now, seg, p, level, vel } = F;
   ctx.fillStyle = C.mint; ctx.fillRect(0, 0, W, H); lastBg = C.mint;
-  const cx = W / 2, cy = H * 0.41, s = Math.min(W * 0.34, H * 0.25), shape = BOX_SHAPE[seg.round % 8];
+  const cx = W / 2, cy = H * 0.41, s = Math.min(W * 0.3, H * 0.25), shape = BOX_SHAPE[seg.round % 8];
   const U = (seg.side + clamp(p)) / 4, full = seg.side === 1;
 
   // the tile: liquid rises with the breath, holds charge it with dots

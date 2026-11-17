@@ -21,7 +21,7 @@ export function initAudio() {
   const d = NOISE.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
   const g = (v, to) => { const n = ctx.createGain(); n.gain.value = v; if (to) n.connect(to); return n; };
 
-  N.master = g(0.9, ctx.destination);
+  N.master = g(A.muted ? 0 : 0.9, ctx.destination);
   N.comp = ctx.createDynamicsCompressor(); N.comp.threshold.value = -16; N.comp.ratio.value = 4; N.comp.attack.value = 0.005; N.comp.release.value = 0.2;
   N.comp.connect(N.master);
   N.mus = g(1, N.comp);                               // ducked to near-silence in holds
@@ -49,6 +49,7 @@ export function initAudio() {
     o.connect(g(lvl, N.droneG)); o.start(); N.drone.push({ o, semi });
   }
   setInterval(tick, 25);
+  ctx.resume();                                         // iOS starts suspended
   A.ready = true;
 }
 function impulse(sec, decay) {
