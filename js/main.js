@@ -153,7 +153,7 @@ function frame() {
   const tPerf = performance.now() / 1000, now = st.playing ? audio.clock() : tPerf;
   const dt = Math.min(0.1, Math.max(0.001, now - st.last)); st.last = now;
   const { W, H, u } = st;
-  const F = { ctx, W, H, u, now, dt, J, br: Br };
+  const F = { ctx, W, H, u, now, dt, J, br: Br, cam: st.cam };
 
   if (!st.playing) {
     const pacer = 0.5 - 0.42 * Math.cos((tPerf * 2 * Math.PI) / 8);

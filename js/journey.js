@@ -25,7 +25,8 @@ export function buildJourney() {
   const S = [];
   const add = (o) => { S.push({ from: 0, to: 0, cue: '', sub: '', ...o }); return S[S.length - 1]; };
 
-  add({ stage: 'sips', kind: 'title', dur: 6, cue: 'glide', sub: 'Small sips in, one long breath out. Follow the dotted line.' });
+  add({ stage: 'sips', kind: 'title', dur: 8, cue: 'glide', sub: 'Small sips in, one long breath out. Follow the dotted line.',
+    camSub: 'Keep your whole face and upper chest in view of the camera.' });
   SIP_ORDER.forEach((pi, k) => {
     let lvl = 0;
     SIP_PATTERNS[pi].forEach(([kind, beats, to, cue], j) => {

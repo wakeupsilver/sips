@@ -14,7 +14,7 @@ function cueText(F, y, col, shade, o = {}) {
   const { ctx, W, u, seg, el } = F;
   if (seg.cue && (o.cueAlpha ?? 1) > 0.01) label(ctx, seg.cue, W / 2, y, u * (o.size || 10), col, { shade, scale: 1 + 0.3 * Math.exp(-el * 7), alpha: o.cueAlpha ?? 1 });
   const sub = o.sub ?? seg.sub;
-  if (sub) wrap(ctx, sub, W / 2, y + u * (o.size || 10) * 0.78, Math.max(15, u * 2.5), col, Math.min(W * 0.84, u * 70), (o.subAlpha ?? 1) * smooth(el / 0.6));
+  if (sub) wrap(ctx, sub, W / 2, y + u * (o.size || 10) * 0.78 + Math.max(0, 15 - u * 2.5) * 1.6, Math.max(15, u * 2.5), col, Math.min(W * 0.84, u * 70), (o.subAlpha ?? 1) * smooth(el / 0.6));
 }
 function titleCard(F, bg, fg, shade) {
   const { ctx, W, H, u, el, now, level, vel } = F;
@@ -23,7 +23,7 @@ function titleCard(F, bg, fg, shade) {
   ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(W / 2, H * 0.4, k * Math.hypot(W, H), 0, TAU); ctx.fill();
   if (k >= 1) lastBg = bg;
   puff(ctx, W / 2, H * 0.36, u * (7 + 3.5 * level) * smooth(el / 0.5), { t: now, vel, eyes: 'open', mouth: 'smile', shade });
-  cueText(F, H * 0.64, fg, shade, { size: 13 });
+  cueText(F, H * 0.64, fg, shade, { size: 13, sub: F.cam && F.seg.camSub ? `${F.seg.sub} ${F.seg.camSub}` : F.seg.sub });
 }
 
 // =================================================================== 1. SIPS (glider)
