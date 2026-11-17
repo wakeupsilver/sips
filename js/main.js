@@ -29,6 +29,7 @@ const work = document.createElement('canvas'), wctx = work.getContext('2d', { wi
 V.wctx = wctx;
 
 const J = new Journey(buildJourney());
+Br.allowKeys = new URLSearchParams(location.search).has('keys');
 const st = { W: 0, H: 0, u: 1, playing: false, cam: false, face: null, last: 0, cued: null, prev: null, endT: 0, resultsShown: false };
 // overall progress: time through the whole script (open holds count as their suggested length)
 const durOf = (s) => (s.kind === 'end' ? 0 : s.open ? s.target : s.dur);

@@ -30,7 +30,8 @@ export function updateBreath(dt, tPerf, pacer, pacerDir, camOn) {
 
   // space bar: hold = breathe in
   B.keyLevel = clamp(B.keyLevel + (B.key ? dt / 1.3 : -dt / 2.2), 0, 1);
-  if (B.key) { B.keyT = tPerf; if (!camOn || tPerf - B.keyDownT > 0.4) B.keyMode = true; }
+  // hold-to-breathe is a testing aid only (?keys=1): without a camera people simply follow the pacer
+  if (B.key && B.allowKeys) { B.keyT = tPerf; if (!camOn || tPerf - B.keyDownT > 0.4) B.keyMode = true; }
   if (tPerf - B.keyT > 20) B.keyMode = false;
   const keysActive = B.keyMode;
 
