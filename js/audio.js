@@ -8,8 +8,8 @@ const mtof = (m) => 440 * 2 ** ((m - 69) / 12);
 const rnd = (a, b) => a + Math.random() * (b - a);
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
-export const A = { ready: false, muted: false };
-const M = { stage: '', kind: '', s: null, round: 0, n: 0, drums: false, chord: [50, 57, 61, 66], root: 38, pump: false, heart: false, bloom: false, bloomT: 0, collectI: 0 };
+export const A = { ready: false, muted: false, kit: 'pop' };
+const M = { stage: '', kind: '', s: null, round: 0, n: 0, drums: false, chord: [50, 57, 61, 66], root: 38, pump: false, heart: false, bloom: false, bloomT: 0, collectI: 0, padV: 0 };
 const seq = { fn: null, dur: 0.125, step: 0, nextT: 0 };
 
 export const clock = () => (ctx ? ctx.currentTime : performance.now() / 1000);
@@ -49,6 +49,7 @@ export function initAudio() {
     o.connect(g(lvl, N.droneG)); o.start(); N.drone.push({ o, semi });
   }
   setInterval(tick, 25);
+  for (const p of N.pad) p.o.type = K().wave;
   ctx.resume();                                         // iOS starts suspended
   A.ready = true;
 }
@@ -84,7 +85,7 @@ function boom(t) {
 function heart(t, v = 0.5) { const gn = vg(N.dry), o = osc('sine', 62, t, 0.3, gn); o.frequency.exponentialRampToValueAtTime(38, t + 0.12); env(gn, t, 0.004, 0.22, v); }
 
 function setChord(notes, t, glide = 0.25) { M.chord = notes; if (!ctx) return; for (const p of N.pad) p.o.frequency.setTargetAtTime(mtof(notes[p.v % notes.length]), t, glide); }
-function padLevel(v, t, tc = 0.4) { N.padG.gain.setTargetAtTime(v, t, tc); }
+function padLevel(v, t, tc = 0.4) { M.padV = v; N.padG.gain.setTargetAtTime(v * K().pad, t, tc); }
 function setHold(x, t) { N.mus.gain.setTargetAtTime(1 - 0.94 * x, t, 0.12); N.droneG.gain.setTargetAtTime(0.32 * x, t, 0.8); }
 function droneRoot(m, t) { for (const d of N.drone) d.o.frequency.setTargetAtTime(mtof(m + d.semi), t, 0.5); }
 
@@ -173,6 +174,124 @@ function gLand(step, t) {
   else if (k % 16 === 0) bell(t, pick(M.chord) + 12, 0.06, 2.4);
 }
 
+// ------------------------------------------------------------------ other music styles
+// Same harmony and the same breath-locked timing as the default ("Pop"); different instruments and patterns.
+function chip(t, m, v = 0.08, d = 0.12, dest = N.musW) { const gn = vg(dest); osc('square', mtof(m), t, d, gn); gn.gain.setValueAtTime(v, t); gn.gain.setValueAtTime(v * 0.6, t + d * 0.5); gn.gain.linearRampToValueAtTime(0.0001, t + d); }
+function shaker(t, v = 0.1) { const gn = vg(N.mus); noise(t, 0.06, filt('bandpass', 5200, 1.4, gn)); env(gn, t, 0.008, 0.05, v); }
+const quiet = (step, t) => { if (step % 16 === 0) bell(t, pick(M.chord) + 12, 0.06, 2.4); };
+
+// Dream: no drums, bells and soft plucks
+function gSipsDream(step, t) {
+  const s = step % 16; if (!M.drums) return quiet(step, t);
+  if (s === 0) bass(t, M.root, 1.4, 0.3);
+  if (s % 4 === 0 && Math.random() < 0.75) bell(t, M.chord[(s / 4) % 4] + 12, 0.07, 2.6);
+  if ((s === 6 || s === 14) && Math.random() < 0.4) pluck(t, pick(M.chord) + 24, 0.07, 0.9, N.dryW);
+}
+function gBoxDream(step, t) {
+  const k = step % 32, moving = M.kind === 'in' || M.kind === 'out';
+  if (M.kind === 'title') return quiet(step, t);
+  if (k % 8 === 0) bell(t, M.chord[(k / 8) % 4] + 12, 0.13, 1.6);
+  if (k === 0) bass(t, M.root, 3.4, 0.28);
+  if (moving && k % 8 === 4) pluck(t, M.chord[(k / 8 | 0) % 4] + 24, 0.07, 0.8, N.dryW);
+}
+function gWimDream(step, t) {
+  if (!M.pump) return gWim(step, t);
+  const k = step % 24, n = M.n, PENT = [0, 3, 5, 7, 10];
+  if (k === 0) bell(t, M.root + 24 + PENT[n % 5] + (n >= 15 ? 12 : 0), 0.13, 1.8);
+  if (k === 12) pluck(t, M.root + 24, 0.1, 0.7, N.dryW);
+  if (n >= 8 && k % 6 === 0) tom(t, 60, 0.22);
+  if (n >= 18 && k % 3 === 0) pluck(t, M.chord[(k / 3) % 4] + 12, 0.06, 0.3);
+  if (n >= 25 && k % 2 === 0) bell(t, M.root + 36 + PENT[(k / 2) % 5], 0.05, 0.8);
+}
+
+// Arcade: square waves and quick arpeggios
+function gSipsArcade(step, t) {
+  const s = step % 16; if (!M.drums) { if (s % 8 === 0) chip(t, pick(M.chord) + 12, 0.05, 0.3); return; }
+  if (s === 0 || s === 8) kick(t, 0.6); if (s === 4 || s === 12) rim(t, 0.25);
+  if (s % 2 === 1) hat(t, 0.07, 0.025);
+  if ([0, 3, 6, 10].includes(s)) chip(t, M.root + (s === 6 ? 12 : 0), 0.11, 0.14, N.mus);
+  chip(t, M.chord[s % 4] + (s % 8 < 4 ? 12 : 24), 0.04, 0.09);
+}
+function gBoxArcade(step, t) {
+  const k = step % 32, moving = M.kind === 'in' || M.kind === 'out', r = M.round;
+  if (M.kind === 'title') { if (k % 16 === 0) chip(t, pick(M.chord) + 12, 0.05, 0.4); return; }
+  if (k % 8 === 0) chip(t, M.chord[(k / 8) % 4] + 24, 0.09, 0.3);
+  if (!moving) return;
+  if (k % 4 === 0) kick(t, 0.55);
+  if (k % 4 === 2) chip(t, M.root, 0.11, 0.12, N.mus);
+  if (r >= 2 && k % 2 === 0) chip(t, M.chord[(k / 2) % 4] + 12, 0.04, 0.09);
+  if (r >= 4 && k % 2 === 1) hat(t, 0.07, 0.025);
+  if (r >= 6 && k % 8 === 4) rim(t, 0.22);
+}
+function gWimArcade(step, t) {
+  if (!M.pump) return gWim(step, t);
+  const k = step % 24, n = M.n;
+  if (k === 0) { chip(t, M.root + 24, 0.1, 0.1); chip(t + 0.06, M.root + 31, 0.1, 0.1); chip(t + 0.12, M.root + 36, 0.1, 0.16); }
+  if (k === 12) { chip(t, M.root + 31, 0.09, 0.1); chip(t + 0.06, M.root + 24, 0.09, 0.16); }
+  if (n >= 5 && k % 4 === 0) kick(t, 0.65);
+  if (n >= 10 && k % 2 === 1) hat(t, 0.08, 0.025);
+  if (n >= 15) chip(t, M.chord[k % 4] + (n >= 22 ? 24 : 12), 0.04, 0.08);
+  if (n >= 20 && k % 4 === 2) chip(t, M.root, 0.11, 0.1, N.mus);
+  if (n >= 26 && (n >= 28 || k % 2 === 0)) rim(t, 0.12 + 0.004 * k);
+}
+function gLandArcade(step, t) {
+  const k = step % 48;
+  if (M.kind === 'in') { if (k % 2 === 0 && k < 16) chip(t, M.chord[(k / 2) % 4] + 12, 0.07, 0.4, N.dryW); if (k === 0) chip(t, M.root, 0.09, 1.2, N.mus); }
+  else if (M.kind === 'out') { if (k % 4 === 0) chip(t, M.chord[3 - ((k / 4) % 4)] + 12, 0.05, 0.7, N.dryW); }
+  else if (k % 16 === 0) chip(t, pick(M.chord) + 12, 0.05, 0.6, N.dryW);
+}
+
+// Drums: a hand-drum circle, almost no melody
+function gSipsDrums(step, t) {
+  const s = step % 16; if (!M.drums) { if (s % 8 === 0) tom(t, 60, 0.25); return; }
+  if (s === 0 || s === 6 || s === 10) tom(t, 58, 0.6); if (s === 3 || s === 12) tom(t, 92, 0.42);
+  if (s === 14 && Math.random() < 0.6) tom(t, 132, 0.3);
+  if (s % 2 === 0) shaker(t, s % 8 === 4 ? 0.14 : 0.07);
+}
+function gBoxDrums(step, t) {
+  const k = step % 32, moving = M.kind === 'in' || M.kind === 'out', r = M.round;
+  if (M.kind === 'title') { if (k % 16 === 0) tom(t, 60, 0.25); return; }
+  if (k % 8 === 0) tom(t, k === 0 ? 55 : 76, k === 0 ? 0.62 : 0.42);          // four hits a side
+  if (!moving) return;
+  if (k % 2 === 0) shaker(t, 0.08);
+  if (k % 8 === 4) tom(t, 112, 0.3);
+  if (r >= 3 && k % 8 === 6) tom(t, 140, 0.24);
+  if (r >= 6 && k % 8 === 2) tom(t, 92, 0.24);
+}
+function gWimDrums(step, t) {
+  if (!M.pump) return gWim(step, t);
+  const k = step % 24, n = M.n;
+  if (k === 0) tom(t, 55, 0.72); if (k === 12) tom(t, 86, 0.55);
+  if (n >= 5 && k % 2 === 0) shaker(t, 0.09);
+  if (n >= 10 && k % 6 === 3) tom(t, 122, 0.3);
+  if (n >= 15 && k % 4 === 0) tom(t, 70, 0.4);
+  if (n >= 20 && k % 12 === 6) clap(t, 0.2);
+  if (n >= 26 && (n >= 28 || k % 2 === 0)) tom(t, 100 + k * 4, 0.22);
+}
+function gLandDrums(step, t) {
+  const k = step % 48;
+  if (M.kind === 'in') { if (k % 4 === 0 && k < 16) tom(t, 70 + (k / 4) * 8, 0.3); }
+  else if (M.kind === 'out') { if (k % 8 === 0) tom(t, 56, 0.26); if (k % 16 === 8) bell(t, pick(M.chord) + 12, 0.05, 3); }
+  else if (k % 16 === 0) tom(t, 60, 0.22);
+}
+
+export const KITS = {
+  pop:    { name: 'Pop',    wave: 'sawtooth', pad: 1,    g: { sips: gSips, box: gBox, wim: gWim, land: gLand } },
+  dream:  { name: 'Dream',  wave: 'triangle', pad: 1.7,  g: { sips: gSipsDream, box: gBoxDream, wim: gWimDream, land: gLand } },
+  arcade: { name: 'Arcade', wave: 'square',   pad: 0.5,  g: { sips: gSipsArcade, box: gBoxArcade, wim: gWimArcade, land: gLandArcade } },
+  drums:  { name: 'Drums',  wave: 'sawtooth', pad: 0.55, g: { sips: gSipsDrums, box: gBoxDrums, wim: gWimDrums, land: gLandDrums } },
+};
+const K = () => KITS[A.kit] || KITS.pop;
+// switch style; takes effect on the next step, keeping the beat
+export function setKit(name) {
+  if (!KITS[name]) name = 'pop';
+  A.kit = name;
+  if (!ctx) return;
+  for (const p of N.pad) p.o.type = K().wave;
+  N.padG.gain.setTargetAtTime(M.padV * K().pad, ctx.currentTime, 0.3);
+  if (seq.fn && K().g[M.stage]) seq.fn = K().g[M.stage];
+}
+
 // called a moment before each segment starts (t = its start on the audio clock)
 export function cue(s, t) {
   if (!ctx) return;
@@ -182,19 +301,19 @@ export function cue(s, t) {
   M.pump = !!s.pump; M.heart = !!s.open; M.bloom = !!s.bloom;
 
   if (s.stage === 'sips') {
-    if (stageChange || s.bar) groove(gSips, 0.1875, t);
+    if (stageChange || s.bar) groove(K().g.sips, 0.1875, t);
     M.drums = s.kind !== 'title'; setHold(0, t); padLevel(0.5, t);
     if (s.kind === 'title') { setChord(SIP_PROG[0], t); M.root = SIP_ROOT[0]; }
     if (s.bar) { const c = s.pat % 4; setChord(SIP_PROG[c], t); M.root = SIP_ROOT[c]; M.collectI = 0; }
     if (s.cue === 'long out' || s.cue === 'out') whoosh(t, Math.min(2, s.dur * 0.4), 0.05);
   } else if (s.stage === 'box') {
-    if (stageChange || s.bar) groove(gBox, 0.125, t);
+    if (stageChange || s.bar) groove(K().g.box, 0.125, t);
     setHold(0, t); padLevel(s.kind === 'title' ? 0.35 : 0.5, t);
     const c = s.side ?? 0; setChord(BOX_CH[c], t, 0.12); M.root = BOX_ROOT[c];
   } else if (s.stage === 'wim') {
     const root = 40 + 2 * M.round;                       // E, F#, G#
     M.root = root - 12;
-    if (stageChange || s.bar || s.kind === 'title' || s.open || s.bloom) groove(gWim, 60 / 128 / 4, t);
+    if (stageChange || s.bar || s.kind === 'title' || s.open || s.bloom) groove(K().g.wim, 60 / 128 / 4, t);
     if (s.kind === 'title' || s.kind === 'free') { setHold(0, t); padLevel(0.35, t, 1); setChord([root + 12, root + 15, root + 19, root + 22], t, 0.6); }
     else if (s.pump) {
       setHold(0, t); padLevel(0.42 + 0.01 * M.n, t, 0.2);
@@ -207,7 +326,7 @@ export function cue(s, t) {
     else if (s.bloom) { M.bloomT = t; boom(t); padLevel(0.6, t, 0.3); setChord([root + 12, root + 19, root + 26, root + 28], t, 0.2); }
     else if (s.after) { whoosh(t, s.dur, 0.22); padLevel(0.35, t, 1.5); }
   } else if (s.stage === 'land') {
-    if (stageChange || s.bar) groove(gLand, 0.25, t);
+    if (stageChange || s.bar) groove(K().g.land, 0.25, t);
     setHold(0, t); padLevel(s.kind === 'end' ? 0.25 : 0.42, t, 1.5);
     const c = s.kind === 'end' ? 0 : (s.k ?? 0) % 4;
     if (s.bar || s.kind !== 'out') { setChord(SIP_PROG[c], t, 0.8); M.root = SIP_ROOT[c]; }

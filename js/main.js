@@ -133,6 +133,14 @@ function setSound(on) {
   try { localStorage.setItem('bt-sound', on ? 'on' : 'off'); } catch (e) { /* private mode */ }
 }
 $('#bSound').onclick = () => setSound(audio.A.muted);
+// music style: one button that steps through the styles, remembered on this device
+function setMusic(kit) {
+  audio.setKit(kit);
+  $('#bMusic').textContent = 'Music: ' + audio.KITS[audio.A.kit].name;
+  try { localStorage.setItem('bt-music', audio.A.kit); } catch (e) { /* private mode */ }
+}
+$('#bMusic').onclick = () => { const names = Object.keys(audio.KITS); setMusic(names[(names.indexOf(audio.A.kit) + 1) % names.length]); };
+try { setMusic(localStorage.getItem('bt-music') || 'pop'); } catch (e) { /* private mode */ }
 try { if (localStorage.getItem('bt-sound') === 'off') setSound(false); } catch (e) { /* private mode */ }
 window.addEventListener('keydown', (e) => {
   if (e.target.closest?.('button') && e.code === 'Space') return;
