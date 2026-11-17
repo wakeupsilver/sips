@@ -126,13 +126,13 @@ canvas.addEventListener('pointerdown', (e) => { e.preventDefault(); press(true);
 for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) canvas.addEventListener(ev, () => press(false));
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 $('#bSkip').onclick = () => st.playing && J.skip(audio.clock());
-// sound on/off: on the start screen and in the top bar, remembered on this device
+// sound on/off: in the top bar while playing, remembered on this device
 function setSound(on) {
   audio.setMuted(!on);
-  for (const b of [$('#bSound'), $('#introSound')]) { b.textContent = on ? 'Sound on' : 'Sound off'; b.setAttribute('aria-pressed', String(on)); }
+  const b = $('#bSound'); b.textContent = on ? 'Sound on' : 'Sound off'; b.setAttribute('aria-pressed', String(on));
   try { localStorage.setItem('bt-sound', on ? 'on' : 'off'); } catch (e) { /* private mode */ }
 }
-$('#bSound').onclick = $('#introSound').onclick = () => setSound(audio.A.muted);
+$('#bSound').onclick = () => setSound(audio.A.muted);
 try { if (localStorage.getItem('bt-sound') === 'off') setSound(false); } catch (e) { /* private mode */ }
 window.addEventListener('keydown', (e) => {
   if (e.target.closest?.('button') && e.code === 'Space') return;
