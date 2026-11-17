@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Breathtaker</title>
+<meta name="description" content="A breathing game. Sips, box breathing and three Wim Hof rounds, played with your own breath.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='54' cy='55' r='42' fill='%23ff9ecf'/><circle cx='50' cy='50' r='42' fill='%23fff8ef'/><circle cx='37' cy='45' r='5' fill='%2317123a'/><circle cx='63' cy='45' r='5' fill='%2317123a'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Onest:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="pre">
+<canvas id="c" aria-label="Breathing game"></canvas>
+<video id="video" playsinline muted></video>
+
+<header id="hud">
+  <div id="bar" role="progressbar" aria-label="Journey progress" aria-valuemin="0" aria-valuemax="100"><div id="barFill"></div><div id="barMarks"></div><div id="barHead"></div></div>
+  <div id="chip" role="status"><i></i><span>Follow the pacer</span></div>
+  <div class="btns">
+    <button id="bSound" aria-pressed="true">Sound on</button>
+    <button id="bSkip" title="Skip to the next part (right arrow)">Skip ahead</button>
+  </div>
+</header>
+<button id="air">Breathe in now</button>
+
+<main id="intro">
+  <div class="lead">
+    <h1>breath<br>taker</h1>
+    <p class="tag">A twelve-minute game you play by breathing. It starts with sips, builds a town out of box breaths, then launches you through three Wim Hof rounds.</p>
+    <div class="go">
+      <button id="start" class="big">Start with camera</button>
+      <button id="startNo" class="plain">Start without camera</button>
+    </div>
+    <p class="fine">The camera watches your chest rise and fall so the game can react to you. Nothing is recorded and nothing leaves this device. Without it, hold the space bar to breathe in.</p>
+  </div>
+  <aside class="safety">
+    <h2>Before you start</h2>
+    <ul>
+      <li>Sit or lie down somewhere safe.</li>
+      <li>Never do this in water, in the bath or while driving.</li>
+      <li>Skip the breath holds if you are pregnant or have epilepsy, a heart condition or high blood pressure.</li>
+      <li>Tingling and light-headedness are normal. If you feel faint, stop and breathe normally.</li>
+    </ul>
+  </aside>
+</main>
+
+<section id="results" hidden>
+  <div class="card">
+    <h2>you landed</h2>
+    <p class="hero"><b id="rHold">0:00</b><span>longest breath hold</span></p>
+    <dl id="rRows"></dl>
+    <div class="go">
+      <button id="again" class="big">Go again</button>
+      <button id="share" class="plain">Share with a friend</button>
+    </div>
+    <p class="tip" id="tip" hidden>Did this do you some good? <a id="tipLink" target="_blank" rel="noopener">Send a thank-you on Venmo</a></p>
+  </div>
+</section>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
