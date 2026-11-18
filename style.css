@@ -52,7 +52,6 @@ h1 { font: 400 clamp(4.6rem, 15vw, 10.5rem)/.8 var(--display); margin: 0 0 1.2re
 .facts { grid-area: facts; display: grid; gap: .9rem; max-width: 27rem; font-size: .9rem; line-height: 1.45; }
 .facts p { margin: 0; }
 .facts b { display: block; font: 400 1.05rem/1.2 var(--display); letter-spacing: .01em; margin-bottom: .1rem; }
-.mob-block { display: none; } .touch .mob-block { display: block; }
 .safety { grid-area: safety; background: var(--lemon); color: var(--ink); border-radius: 1.4rem; padding: 1.2rem 1.4rem 1.1rem; transform: rotate(-1.5deg); box-shadow: 7px 8px 0 var(--ink); }
 .safety h2 { font: 400 1.5rem/1.05 var(--display); margin: 0 0 .5rem; }
 .safety .lede { margin: 0 0 .7rem; font-size: .92rem; font-weight: 700; line-height: 1.35; }
@@ -62,11 +61,12 @@ h1 { font: 400 clamp(4.6rem, 15vw, 10.5rem)/.8 var(--display); margin: 0 0 1.2re
 .safety li::before { content: ""; position: absolute; left: 0; top: .08em; width: 1.05rem; height: 1.05rem; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.6 22.4 20.4a1 1 0 0 1-.9 1.5H2.5a1 1 0 0 1-.9-1.5Z' fill='%23ff7a1a' stroke='%2317123a' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M12 9.2v5.2' stroke='%2317123a' stroke-width='2.4' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='18' r='1.4' fill='%2317123a'/%3E%3C/svg%3E") center / contain no-repeat; }
 .safety .note { margin: .7rem 0 0; font-size: .72rem; opacity: .75; }
 @media (max-width: 760px) {
-  #intro { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "hero" "go" "safety" "facts"; gap: 1.1rem; }
+  #intro { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "hero" "go" "facts" "safety"; gap: 1.1rem; }
   h1 { margin-bottom: .7rem; }
   #hero { aspect-ratio: 16 / 9; transform: rotate(-1deg); }
   .safety { transform: rotate(-1deg); }
-  .facts { max-width: none; background: var(--deep); border-radius: 1.2rem; padding: 1.1rem 1.2rem; margin: .4rem 0 1.5rem; }
+  .facts { max-width: none; background: var(--deep); border-radius: 1.2rem; padding: 1.1rem 1.2rem; margin: .4rem 0 .3rem; }
+  .safety { margin-bottom: 1.5rem; }
 }
 
 /* ---------------------------------------------------------------- results */
