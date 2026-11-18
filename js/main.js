@@ -5,6 +5,7 @@ import { buildJourney, Journey } from './journey.js';
 import * as audio from './audio.js';
 import { drawStage, drawIdle, drawDemo, drawGauge, onSeg, stats, resetStats } from './stages.js';
 import { drawParts, grain, parts } from './gfx.js';
+import { placement, drawSetup } from './setup.js';
 
 const MP_VERSION = '0.10.14';
 const MP_BUNDLE = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VERSION}/vision_bundle.mjs`;
@@ -84,7 +85,13 @@ async function begin(withCam) {
   document.fonts?.load('10px "Bagel Fat One"');
   if (withCam) { try { await startCamera(); } catch (e) { console.warn('No camera', e); st.camDenied = true; } }
   resetStats(); parts.length = 0; Br.syncSum = Br.syncN = 0; st.prev = null; st.cued = null; st.resultsShown = false;
-  document.body.className = 'play'; $('#results').hidden = true;
+  $('#results').hidden = true;
+  // with a camera, first help the player place themselves; then the journey starts
+  if (withCam && st.cam) { st.setup = true; st.held = 0; st.okSince = null; document.body.className = 'setup'; return; }
+  startJourney();
+}
+function startJourney() {
+  st.setup = false; document.body.className = 'play';
   st.playing = true;
   J.start(audio.clock() + 0.05);
   const want = new URLSearchParams(location.search).get('stage');
@@ -122,6 +129,7 @@ $('#share').onclick = async () => {
   setTimeout(() => { b.textContent = 'Share with a friend'; }, 4000);
 };
 $('#air').onclick = release;
+$('#setupGo').onclick = startJourney;
 canvas.addEventListener('pointerdown', (e) => { e.preventDefault(); press(true); release(); });
 for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) canvas.addEventListener(ev, () => press(false));
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -164,6 +172,14 @@ function frame() {
   const { W, H, u } = st;
   const F = { ctx, W, H, u, now, dt, J, br: Br, cam: st.cam };
 
+  if (st.setup) {                                       // "find your spot"
+    const p = placement(!!st.face, !!st.faceFailed);
+    if (!p.ok) st.okSince = null; else if (st.okSince == null) st.okSince = now;
+    st.held = p.ok ? now - st.okSince : 0;
+    drawSetup(F, video, p, st.held, TOUCH); grain(ctx, W, H);
+    if (st.held > 2) startJourney();
+    return;
+  }
   if (!st.playing) {
     const pacer = 0.5 - 0.42 * Math.cos((tPerf * 2 * Math.PI) / 8);
     updateBreath(dt, tPerf, pacer, 0, false);

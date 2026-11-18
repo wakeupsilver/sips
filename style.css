@@ -16,7 +16,7 @@ button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 
 /* ---------------------------------------------------------------- in-game chrome */
 #hud { position: fixed; inset: 0 0 auto 0; display: flex; align-items: center; gap: .6rem; padding: max(.8rem, env(safe-area-inset-top)) 1rem 0; pointer-events: none; transition: opacity .4s; }
-body.pre #hud, body.done #hud { opacity: 0; visibility: hidden; }
+body.pre #hud, body.done #hud, body.setup #hud { opacity: 0; visibility: hidden; }
 #hud > * { pointer-events: auto; }
 #bar { position: relative; flex: 1; max-width: 22rem; height: .95rem; margin-right: auto; border-radius: 1rem; background: rgba(23, 18, 58, .28); box-shadow: 3px 3px 0 rgba(23, 18, 58, .22); }
 #barFill { position: absolute; inset: 0 auto 0 0; width: 0; min-width: .95rem; border-radius: 1rem; background: var(--lemon); }
@@ -34,6 +34,8 @@ body.pre #hud, body.done #hud { opacity: 0; visibility: hidden; }
 #hud button:hover { background: var(--lemon); }
 #air { position: fixed; left: 50%; bottom: max(1.4rem, env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--milk); color: var(--ink); font-family: var(--display); font-size: 1.25rem; padding: .7rem 1.6rem; border-radius: 3rem; box-shadow: 4px 4px 0 var(--peri); opacity: 0; visibility: hidden; transition: opacity .6s; }
 #air.show { opacity: 1; visibility: visible; }
+#setupGo { position: fixed; left: 50%; bottom: max(1.2rem, env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--milk); color: var(--ink); font-family: var(--display); font-size: 1.1rem; padding: .6rem 1.5rem; border-radius: 3rem; box-shadow: 4px 4px 0 var(--ink); display: none; }
+body.setup #setupGo { display: block; }
 
 /* ---------------------------------------------------------------- start screen */
 #intro { position: fixed; inset: 0; overflow: auto; display: grid; grid-template-columns: minmax(0, 32rem) minmax(0, 24rem); grid-template-areas: "head hero" "go hero" "facts safety"; justify-content: space-between; align-content: start; align-items: start; gap: 1.4rem 2.5rem; padding: clamp(1.2rem, 4.5vw, 3.5rem); color: var(--milk); }
