@@ -431,10 +431,40 @@ export function drawStage(F) {
   if (s.stage === 'wim') return drawWim(F);
   return drawLand(F);
 }
-// behind the start screen
+// the little window on the start screen: Puff sipping along the dotted path, catching coins
+const demo = { lastK: 0 };
+function demoLevel(t) {
+  t = ((t % 6) + 6) % 6; const e = (p) => 0.5 - 0.5 * Math.cos(Math.PI * clamp(p));
+  if (t < 1.2) return 0.6 * e(t / 1.2); if (t < 2) return 0.6 + 0.4 * e((t - 1.2) / 0.8); if (t < 2.4) return 1;
+  return 1 - e((t - 2.4) / 3.6);
+}
+export function drawDemo(F) {
+  const { ctx, W, H, u, now, dt } = F, w = WAYS[1], level = demoLevel(now), vel = (demoLevel(now + 0.05) - demoLevel(now - 0.05)) / 0.1;
+  sipsScene({ ...F, level }, w, now * W * 0.25);
+  const px = W * 0.27, speed = W * 0.24, yOf = (l) => lerp(H * 0.68, H * 0.2, l), STEP = 0.3, k0 = Math.ceil(now / STEP);
+  if (demo.lastK && k0 - demo.lastK < 20) for (let k = demo.lastK + 1; k < k0; k++) if (k % 4 === 0) burst(px, yOf(level), 7, [C.lemon, C.milk], u * 55, u * 1.6);
+  demo.lastK = k0 - 1;
+  for (let g = Math.floor((now - 2.2) / 6) * 6 + 2.2, n = 0; n < 2; n++, g += 6) {            // a gate at the top of each breath
+    const d = g - now; if (d < -1.6) continue;
+    const s = d < 0 ? 1 + 0.5 * smooth(-d / 0.4) : 1;
+    ctx.save(); ctx.translate(px + d * speed, yOf(1)); ctx.scale(s, s); ctx.lineWidth = u * 2.6;
+    for (const [o, c, a] of [[u, C.ink, 0.2], [0, C.peri, 1]]) { ctx.strokeStyle = c; ctx.globalAlpha = a; ctx.beginPath(); ctx.ellipse(o, o, u * 7, u * 17, 0, 0, TAU); ctx.stroke(); }
+    ctx.restore();
+  }
+  for (let k = k0; k * STEP - now < (W - px) / speed + 0.3; k++) {
+    const d = k * STEP - now, x = px + d * speed, y = yOf(demoLevel(now + d)), coin = k % 4 === 0;
+    if (coin) { ctx.fillStyle = C.ink; ctx.globalAlpha = 0.2; ctx.beginPath(); ctx.arc(x + u * 0.6, y + u * 0.6, u * 3.2, 0, TAU); ctx.fill(); }
+    ctx.globalAlpha = coin ? 1 : 0.75; ctx.fillStyle = coin ? C.lemon : C.ink;
+    ctx.beginPath(); ctx.arc(x, y, coin ? u * (3.2 + 0.4 * Math.sin(now * 5 + k)) : u * 1.1, 0, TAU); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  puff(ctx, px, yOf(level), u * (8.5 + 4.5 * level), { t: now, vel, ...faceFor(vel > 0.05 ? 'in' : vel < -0.05 ? 'out' : 'hold', true), rot: clamp(-vel * 0.25, -0.4, 0.4) });
+  drawParts(ctx, dt);
+  const t = ((now % 6) + 6) % 6, word = t < 2.4 ? 'sip' : 'long out', t0 = t < 1.2 ? t : t < 2.4 ? t - 1.2 : t - 2.4;
+  label(ctx, word, W / 2, H * 0.86, u * 15, C.ink, { shade: C.milk, scale: 1 + 0.3 * Math.exp(-t0 * 7) });
+}
+
+// behind the start screen: just the sky and hills (Puff lives in the demo window, drawDemo)
 export function drawIdle(F) {
-  const narrow = F.W < 760;                            // on phones the start text covers the whole sky
-  sipsScene(F, WAYS[0], F.now * 40, narrow);
-  if (narrow || F.H < 700) return;                     // no room: Puff would sit on the text
-  puff(F.ctx, F.W * 0.5, F.H * 0.84, F.u * (6 + 3 * F.level), { t: F.now, vel: F.vel, eyes: F.vel > 0 ? 'open' : 'happy', mouth: F.vel > 0.05 ? 'in' : 'smile' });
+  sipsScene(F, WAYS[0], F.now * 40, F.W < 760);         // on phones the start text covers the whole sky
 }

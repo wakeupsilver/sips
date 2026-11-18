@@ -30,29 +30,32 @@
 <button id="air">Breathe in now</button>
 
 <main id="intro">
-  <div class="lead">
+  <div class="head">
     <h1>sips</h1>
     <p class="tag">Sip air to win, a 12 minute breathing game</p>
-    <div class="go">
-      <button id="start" class="big">Start with camera</button>
-      <button id="startNo" class="plain">Start without camera</button>
-    </div>
-    <p class="fine">It starts with a glide on small sips of air, builds a town out of box breaths, then launches you through three rounds of “Wim Hof” style breathing.</p>
-    <p class="fine"><b>Camera setup:</b> <span class="desk">sit so the camera sees your whole face and your upper chest, then stay fairly still.</span><span class="mob">stand your phone on a table, leaning on something, about an arm's length away, so it sees your whole face and your upper chest. Don't hold it in your hand.</span> The game then reacts to your chest rising and falling.</p>
-    <p class="fine">Nothing is recorded and nothing leaves this device. Without the camera, just follow along.<span class="mob"> If you hear nothing, switch off silent mode.</span></p>
+  </div>
+  <canvas id="hero" aria-label="Preview: Puff glides along a dotted path, collecting coins as it breathes"></canvas>
+  <div class="go">
+    <button id="start" class="big">Start with camera</button>
+    <button id="startNo" class="plain">Start without camera</button>
   </div>
   <aside class="safety">
     <h2>Ancient breathing, new game. Play it with care.</h2>
-    <p class="lede">This is a serious breathing-technique adventure. The exercises are strong: they can make you light-headed and, rarely, faint.</p>
+    <p class="lede">These are serious breathing techniques. They can make you light-headed and, rarely, faint.</p>
     <ul>
-      <li>Sit or lie down somewhere safe, and never force it.</li>
-      <li>Never play in or near water (sea, pool, bath or shower), while driving or operating machinery, or anywhere fainting could hurt you.</li>
-      <li>Do not play if you are pregnant or have epilepsy.</li>
-      <li>If you have heart or blood-pressure problems, or any other medical condition, do not play without asking a doctor first.</li>
-      <li>Tingling and light-headedness are normal and pass. If you feel faint, stop and breathe normally.</li>
-      <li>This is a game, not medical advice.</li>
+      <li>Sit or lie down. Never force it.</li>
+      <li>Never in or near water, while driving or operating machinery.</li>
+      <li>Not if you are pregnant or have epilepsy.</li>
+      <li>Heart, blood-pressure or other medical condition? Ask a doctor first.</li>
+      <li>Tingling is normal. Feeling faint? Stop and breathe normally.</li>
     </ul>
+    <p class="note">A game, not medical advice.</p>
   </aside>
+  <div class="facts">
+    <p><b>The game</b> Glide on sips of air, build a town with box breaths, then ride three rounds of “Wim Hof” style breathing.</p>
+    <p><b>The camera</b> <span class="desk">Sit so it sees your face and upper chest.</span><span class="mob">Stand your phone on a table, an arm's length away, so it sees your face and upper chest.</span> Nothing is recorded or leaves this device. No camera? Just follow along.</p>
+    <p class="mob-block"><b>No sound?</b> Switch off silent mode.</p>
+  </div>
 </main>
 
 <section id="results" hidden>

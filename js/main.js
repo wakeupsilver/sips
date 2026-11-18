@@ -3,7 +3,7 @@ import { V, vitalsFrame } from './vitals.js';
 import { Br, updateBreath, press } from './breath.js';
 import { buildJourney, Journey } from './journey.js';
 import * as audio from './audio.js';
-import { drawStage, drawIdle, drawGauge, onSeg, stats, resetStats } from './stages.js';
+import { drawStage, drawIdle, drawDemo, drawGauge, onSeg, stats, resetStats } from './stages.js';
 import { drawParts, grain, parts } from './gfx.js';
 
 const MP_VERSION = '0.10.14';
@@ -153,6 +153,7 @@ document.addEventListener('visibilitychange', () => { audio.suspend(document.hid
 
 // ------------------------------------------------------------------ frame
 const chip = $('#chip'), chipText = chip.querySelector('span');
+const hero = $('#hero'), hctx = hero.getContext('2d');
 let chipState = '';
 function setChip(text, live) { if (text !== chipState) { chipState = text; chipText.textContent = text; chip.classList.toggle('live', live); } }
 
@@ -167,6 +168,14 @@ function frame() {
     const pacer = 0.5 - 0.42 * Math.cos((tPerf * 2 * Math.PI) / 8);
     updateBreath(dt, tPerf, pacer, 0, false);
     F.level = Br.level; F.vel = Br.vel; drawIdle(F); grain(ctx, W, H);
+    // the demo window on the start screen
+    const hw = hero.clientWidth, hh = hero.clientHeight;
+    if (hw > 10) {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      if (hero.width !== Math.round(hw * dpr) || hero.height !== Math.round(hh * dpr)) { hero.width = Math.round(hw * dpr); hero.height = Math.round(hh * dpr); }
+      hctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      drawDemo({ ctx: hctx, W: hw, H: hh, u: Math.min(hw, hh) / 100, now, dt }); grain(hctx, hw, hh);
+    }
     return;
   }
   J.update(now);
