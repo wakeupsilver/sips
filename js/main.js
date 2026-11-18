@@ -92,7 +92,7 @@ async function begin(withCam) {
 }
 function startJourney() {
   st.setup = false; document.body.className = 'play';
-  st.playing = true;
+  st.playing = true; Br.lo = Br.hi = null; Br.win = [];             // learn this player's breath range afresh
   J.start(audio.clock() + 0.05);
   const want = new URLSearchParams(location.search).get('stage');
   if (want) J.jumpTo(want, audio.clock());

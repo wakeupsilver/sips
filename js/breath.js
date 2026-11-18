@@ -15,7 +15,31 @@ export const Br = {
   syncSum: 0, syncN: 0,
   source: 'pacer',   // 'pacer' | 'camera' | 'keys'
   key: false, keyLevel: 0, keyT: -99, keyDownT: -99, keyMode: false, bigInhale: 0,
+  lo: null, hi: null, // this person's own emptiest and fullest chest position lately, px
+  win: [], winT: 0,   // recent chest positions the range is learned from
 };
+
+// Quiet calibration, running all the time: learn how far this chest really travels and
+// stretch that to the full scale, so a shallow breather and a deep one both fill the gauge.
+// The range is the 6th..94th percentile of the last ~24 s of breathing, so one body shift
+// or a single huge breath cannot squeeze everything after it. Holds and fidgeting are not
+// sampled. Until there are a few seconds to go on, it leans on the sensor's own scaling.
+const WIN = 240, STEP = 0.1;
+function ownRange(v, amp, norm, dt, sample) {
+  const B = Br, rough = clamp(0.5 + norm / 2.2, 0, 1);
+  B.winT += dt;
+  if (sample && B.winT >= STEP) {
+    B.winT = 0; B.win.push(v); if (B.win.length > WIN) B.win.shift();
+    const s = B.win.slice().sort((a, b) => a - b), n = s.length;
+    B.lo = s[Math.floor((n - 1) * 0.06)]; B.hi = s[Math.ceil((n - 1) * 0.94)];
+  }
+  if (B.lo == null) return rough;
+  const floor = Math.max(0.3, 1.6 * amp);              // never stretch sensor noise to full scale
+  const span = Math.max(B.hi - B.lo, floor), mid = (B.hi + B.lo) / 2;
+  const own = clamp(0.5 + ((v - mid) / span) * 1.02, 0, 1);
+  const k = clamp((B.win.length - 20) / 40, 0, 1);     // trust it after 2 s, fully after 6 s
+  return rough + (own - rough) * k;
+}
 
 // space bar or a finger on the screen: down = breathing in
 export function press(down) {
@@ -39,7 +63,7 @@ export function updateBreath(dt, tPerf, pacer, pacerDir, camOn) {
   if (fresh && !keysActive) {
     const amp = Math.sqrt(b.ms);                                  // typical chest travel, px
     conf = clamp((amp - 0.05) / 0.25, 0, 1) * (V.motionEMA < 0.25 ? 1 : 0.3);
-    sensed = clamp(0.5 + (b.norm || 0) / 2.2, 0, 1);
+    sensed = ownRange(b.v, amp, b.norm || 0, dt, pacerDir !== 0 && V.motionEMA < 0.25);
     dir = b.dir;
     const thr = 0.15 * amp || 1e-6;
     B.still += (dt / 0.6) * (clamp(1 - Math.abs(b.vel) / (thr * 5), 0, 1) - B.still);
