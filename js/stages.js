@@ -421,6 +421,8 @@ export function onSeg(seg, prev, now, J) {
     if (seg.open) wim.lastFound = -1;
     if (seg.bloom) wim.rings = [];
   }
+  // skipped into the ending: finish the descent at once so Puff lands on the ground, not in space
+  if (seg.kind === 'end' && now - land.t0 < land.total) { land.t0 = now - land.total; land.landed = false; }
   if (seg.stage === 'land' && seg.kind === 'title') { land.t0 = now; land.total = J.totalFixed('land'); land.landed = false; }
 }
 export function drawStage(F) {

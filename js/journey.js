@@ -89,6 +89,7 @@ export class Journey {
   }
   release(now) { if (this.seg.open && now - this.t0 > 2) { this._next(now); return true; } return false; }
   skip(now) {                                        // jump to the next title card
+    if (this.seg.kind === 'end') return;              // already home: nothing left to skip
     let j = this.i + 1;
     while (j < this.segs.length - 1 && this.segs[j].kind !== 'title') j++;
     this._go(j, now);
