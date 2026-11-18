@@ -24,10 +24,12 @@ export function drawSetup(F, video, p, held, touch) {
   const { ctx, W, H, u, now } = F;
   ctx.fillStyle = C.peri; ctx.fillRect(0, 0, W, H);
   label(ctx, 'find your spot', W / 2, H * 0.085, Math.max(26, u * 7), C.milk, { shade: C.ink });
+  // phones: the one thing that matters for the whole session, always on screen
+  if (touch) label(ctx, 'Rest your phone on a surface. Don\u2019t hold it.', W / 2, H * 0.085 + Math.max(30, u * 6.5), Math.max(15, u * 2.6), C.lemon, { body: true, weight: '700' });
 
   // the mirror window
-  const ar = (V.W || 4) / (V.H || 3), maxW = W * 0.9, maxH = H * 0.56;
-  const wh = Math.min(maxH, maxW / ar), ww = wh * ar, x0 = (W - ww) / 2, y0 = H * 0.15;
+  const ar = (V.W || 4) / (V.H || 3), maxW = W * 0.9, maxH = H * (touch ? 0.52 : 0.56);
+  const wh = Math.min(maxH, maxW / ar), ww = wh * ar, x0 = (W - ww) / 2, y0 = H * (touch ? 0.19 : 0.15);
   ctx.fillStyle = C.ink; ctx.globalAlpha = 0.9; rr(ctx, x0 + u, y0 + u * 1.2, ww, wh, u * 3); ctx.fill(); ctx.globalAlpha = 1;
   ctx.save(); rr(ctx, x0, y0, ww, wh, u * 3); ctx.clip();
   ctx.fillStyle = C.deep; ctx.fillRect(x0, y0, ww, wh);
@@ -49,7 +51,7 @@ export function drawSetup(F, video, p, held, touch) {
   // one instruction, and a ring that fills while you are in place
   const ty = y0 + wh + Math.max(34, u * 7);
   label(ctx, p.msg, W / 2, ty, Math.max(22, u * 5), p.ok ? C.lemon : C.milk, { shade: C.ink });
-  const sub = p.sub || (touch && !p.ok ? 'Stand your phone on a table, leaning on something. Do not hold it.' : '');
+  const sub = p.sub;
   if (sub) wrap(ctx, sub, W / 2, ty + Math.max(30, u * 5), Math.max(15, u * 2.4), C.milk, Math.min(W * 0.86, u * 70));
   if (p.ok) { ctx.strokeStyle = C.lemon; ctx.lineWidth = Math.max(4, u); ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(W / 2, ty + Math.max(40, u * 7.5), Math.max(12, u * 2.4), -Math.PI / 2, -Math.PI / 2 + TAU * smooth(held / 2)); ctx.stroke(); }
 }
