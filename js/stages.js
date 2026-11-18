@@ -16,6 +16,18 @@ function cueText(F, y, col, shade, o = {}) {
   const sub = o.sub ?? seg.sub;
   if (sub) wrap(ctx, sub, W / 2, y + u * (o.size || 10) * 0.78 + Math.max(0, 15 - u * 2.5) * 1.6, Math.max(15, u * 2.5), col, Math.min(W * 0.84, u * 70), (o.subAlpha ?? 1) * smooth(el / 0.6));
 }
+// Every title card: a pill that fills as the wait runs out, so it is plain when play begins.
+function startBar(F, fg, track, low) {
+  const { ctx, W, H, u, el, seg, now } = F, p = clamp(el / seg.dur), a = smooth((el - 0.5) / 0.5);
+  const w = Math.min(W * 0.62, u * 62), h = Math.max(10, u * 2.2), x = W / 2 - w / 2, y = H * (low ? 0.955 : 0.9);
+  ctx.save(); ctx.globalAlpha = a;
+  if (!low) label(ctx, 'starting in a moment', W / 2, y - h * 1.5, Math.max(12, u * 2.5), fg, { body: true, weight: '600', alpha: a * 0.85 });
+  ctx.globalAlpha = a * 0.28; ctx.fillStyle = track; rr(ctx, x, y, w, h, h / 2); ctx.fill();
+  ctx.globalAlpha = a; ctx.fillStyle = C.lemon; rr(ctx, x, y, Math.max(h, w * p), h, h / 2); ctx.fill();
+  const hx = x + Math.max(h, w * p) - h / 2;            // a bright bead at the head of the fill
+  ctx.fillStyle = C.milk; ctx.beginPath(); ctx.arc(hx, y + h / 2, h * (0.72 + 0.1 * Math.sin(now * 7)), 0, TAU); ctx.fill();
+  ctx.restore();
+}
 function titleCard(F, bg, fg, shade) {
   const { ctx, W, H, u, el, now, level, vel } = F;
   ctx.fillStyle = lastBg; ctx.fillRect(0, 0, W, H);
@@ -24,6 +36,7 @@ function titleCard(F, bg, fg, shade) {
   if (k >= 1) lastBg = bg;
   puff(ctx, W / 2, H * 0.36, u * (7 + 3.5 * level) * smooth(el / 0.5), { t: now, vel, eyes: 'open', mouth: 'smile', shade });
   cueText(F, H * 0.64, fg, shade, { size: 13, sub: F.cam && F.seg.camSub ? `${F.seg.sub} ${F.seg.camSub}` : F.seg.sub });
+  startBar(F, fg, fg === C.ink ? C.ink : C.night);
 }
 
 // =================================================================== 1. SIPS (glider)
@@ -430,8 +443,8 @@ export function drawStage(F) {
   if (s.kind === 'title' && s.stage !== 'wim' && s.stage !== 'land') return titleCard(F, s.stage === 'box' ? C.mint : C.peri, s.stage === 'box' ? C.ink : C.milk, s.stage === 'box' ? C.milk : C.ink);
   if (s.stage === 'sips') return drawSips(F);
   if (s.stage === 'box') return drawBox(F);
-  if (s.stage === 'wim') return drawWim(F);
-  return drawLand(F);
+  if (s.stage === 'wim') drawWim(F); else drawLand(F);
+  if (s.kind === 'title' && s.stage === 'land') startBar(F, C.milk, C.milk, true);
 }
 // the little window on the start screen: Puff sipping along the dotted path, catching coins
 const demo = { lastK: 0 };
