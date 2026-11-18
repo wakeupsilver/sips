@@ -48,6 +48,9 @@ h1 { font: 400 clamp(4.6rem, 15vw, 10.5rem)/.8 var(--display); margin: 0 0 1.2re
 .big { font-family: var(--display); font-size: 1.5rem; background: var(--lemon); color: var(--ink); padding: .8rem 1.9rem; border-radius: 3rem; box-shadow: 5px 6px 0 var(--ink); transition: transform .12s, box-shadow .12s; }
 .big:hover { transform: translate(-1px, -2px); box-shadow: 6px 8px 0 var(--ink); }
 .big:active { transform: translate(4px, 5px); box-shadow: 1px 1px 0 var(--ink); }
+.big.alt { background: var(--peri); color: var(--milk); }
+.card .go { display: flex; flex-wrap: wrap; gap: 1rem 1.1rem; justify-content: center; align-items: center; }
+.card .go .big { font-size: 1.3rem; padding: .75rem 1.5rem; }
 .plain { text-decoration: underline; text-underline-offset: .25em; font-weight: 700; padding: .5rem 0; }
 .facts { grid-area: facts; display: grid; gap: .9rem; max-width: 27rem; font-size: .9rem; line-height: 1.45; }
 .facts p { margin: 0; }
